@@ -138,7 +138,7 @@ export default function App() {
 
   const [selectedProject, setSelectedProject] = useState<{
     project: Project;
-    color: string;
+    section: Section;
   } | null>(null);
 
   /* Hooks */
@@ -207,7 +207,7 @@ export default function App() {
   /* ── Project modal handlers ── */
   const handleSelectProject = useCallback(
     (project: Project, section: Section) => {
-      setSelectedProject({ project, color: section.color });
+      setSelectedProject({ project, section });
       (window as any).__corridorScroll?.setLocked(true);
     },
     [],
@@ -395,7 +395,7 @@ export default function App() {
       {/* ─── PROJECT MODAL ─── */}
       <ProjectModal
         project={selectedProject?.project || null}
-        sectionColor={selectedProject?.color || '#4488cc'}
+        section={selectedProject?.section || null}
         onClose={handleCloseModal}
       />
 

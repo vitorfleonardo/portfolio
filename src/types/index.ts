@@ -7,6 +7,14 @@ export type AppPhase = 'landing' | 'transition' | 'corridor';
 
 export type Language = 'en' | 'pt' | 'es';
 
+/* ── Section types determine how HoloCards render ── */
+export type SectionType =
+  | 'experience'
+  | 'projects'
+  | 'education'
+  | 'certifications'
+  | 'volunteer';
+
 /* ── Portfolio Data ── */
 export interface Project {
   id: string;
@@ -16,6 +24,22 @@ export interface Project {
   image: string;
   year?: string;
   link?: string;
+
+  /* ── Extended fields (used by specific section types) ── */
+  institution?: string;
+  institutionLogo?: string;
+  role?: string;
+  periodStart?: string;
+  periodEnd?: string;
+  competencies?: string[];
+  techStack?: string[];
+
+  /* ── STAR method fields (shown in expanded modal) ── */
+  starSituation?: string;
+  starTask?: string;
+  starAction?: string;
+  starResult?: string;
+  starMetric?: string;
 }
 
 export interface Section {
@@ -24,6 +48,7 @@ export interface Section {
   subtitle: string;
   color: string;
   portalColor: string;
+  type: SectionType;
   projects: Project[];
 }
 
@@ -53,7 +78,7 @@ export interface PortalProps {
 
 export interface ProjectModalProps {
   project: Project | null;
-  sectionColor: string;
+  section: Section | null;
   onClose: () => void;
 }
 
@@ -70,13 +95,10 @@ export interface LandingPageProps {
   isTransitioning: boolean;
   audioEnabled: boolean;
   onToggleAudio: () => void;
-  /** Current font scale multiplier (e.g. 0.85, 1, 1.15) */
   fontSize: number;
-  /** Adjust font by delta (e.g. +0.1 or -0.1) */
   onAdjustFont: (delta: number) => void;
 }
 
 export interface LandingSceneProps {
-  /** 0 → 1, drives the portal-open zoom animation */
   transitionProgress: number;
 }

@@ -1,219 +1,239 @@
+import { assets } from '../assets';
 import type { Section } from '../types';
 
 /* ═══════════════════════════════════════════════════════════════
-   DATA — Edit this file to populate your portfolio
-   ═══════════════════════════════════════════════════════════════
-   Each section maps to a corridor segment.
-   Cards are auto-distributed along the walls.
-*/
+   DATA — Portfolio sections & projects
+   ═══════════════════════════════════════════════════════════════ */
 
 export const SECTIONS: Section[] = [
-  {
-    id: 'about',
-    title: 'ABOUT',
-    subtitle: 'Who I Am',
-    color: '#a855f7',
-    portalColor: '#c084fc',
-    projects: [
-      {
-        id: 'about-01',
-        title: 'Creative Developer',
-        description:
-          "8+ years crafting immersive digital experiences at the intersection of design and engineering. Passionate about pushing the boundaries of what's possible on the web through 3D, shaders, and interaction design.",
-        tags: ['React', 'Three.js', 'TypeScript', 'GLSL'],
-        image:
-          'https://images.unsplash.com/photo-1550439062-609e1531270e?w=400&h=300&fit=crop',
-      },
-      {
-        id: 'about-02',
-        title: 'Open Source Contributor',
-        description:
-          'Active contributor to React Three Fiber ecosystem. Maintainer of several open-source libraries focused on creative coding and procedural generation.',
-        tags: ['R3F', 'Drei', 'Open Source'],
-        image:
-          'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop',
-      },
-    ],
-  },
+  /* ── 1. PROFESSIONAL EXPERIENCE ── */
   {
     id: 'experience',
-    title: 'EXPERIENCE',
-    subtitle: "Where I've Been",
+    title: 'PROFESSIONAL EXPERIENCE',
+    subtitle: 'Career',
     color: '#06b6d4',
     portalColor: '#22d3ee',
+    type: 'experience',
     projects: [
       {
         id: 'exp-01',
-        title: 'Lead Engineer — Nexus Labs',
+        title: 'Mindsight',
         description:
-          'Leading a team of 12 engineers building real-time 3D collaboration tools. Reduced load times by 60% through custom WebGL pipeline optimization and smart LOD systems.',
-        tags: ['WebGL', 'Node.js', 'AWS', 'Team Lead'],
-        year: '2023 – Present',
-        image:
-          'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=300&fit=crop',
-      },
-      {
-        id: 'exp-02',
-        title: 'Senior Dev — Void Studio',
-        description:
-          'Architected the frontend for an award-winning creative agency. Built custom shader pipelines and interactive installations for global brands.',
-        tags: ['GLSL', 'React', 'Figma', 'Creative'],
-        year: '2020 – 2023',
-        image:
-          'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=300&fit=crop',
-      },
-      {
-        id: 'exp-03',
-        title: 'Frontend Dev — PixelForge',
-        description:
-          'Developed responsive web applications and interactive data visualizations for enterprise clients across finance and healthcare sectors.',
-        tags: ['D3.js', 'Vue', 'Python', 'Data Viz'],
-        year: '2017 – 2020',
-        image:
-          'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop',
-      },
-      {
-        id: 'exp-04',
-        title: 'Intern — CodeWave',
-        description:
-          'First professional role. Built internal tools and learned the fundamentals of production-grade software engineering.',
-        tags: ['JavaScript', 'HTML/CSS', 'Git'],
-        year: '2016 – 2017',
-        image:
-          'https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=400&h=300&fit=crop',
+          'Building and maintaining data pipelines for HR analytics platform. Designing ETL processes, data modeling, and automated reporting systems for enterprise clients.',
+        tags: ['Data Engineering', 'ETL', 'Analytics'],
+        image: assets.logoMindsight,
+        institution: 'Mindsight',
+        institutionLogo: assets.logoMindsight,
+        role: 'Data Engineer',
+        periodStart: 'Jan 2025',
+        periodEnd: 'Ongoing',
+        techStack: ['Python', 'SQL', 'dbt', 'Airflow', 'AWS', 'Snowflake'],
+        starSituation:
+          'Joined an HR-tech startup that needed to scale its data infrastructure from handling dozens of clients to hundreds, with increasingly complex analytics requirements.',
+        starTask:
+          'Design and implement robust data pipelines that could ingest, transform, and serve data reliably across multiple client tenants.',
+        starAction:
+          'Architected a multi-tenant ETL pipeline using dbt and Airflow on AWS. Implemented data quality checks, automated alerting, and built self-serve dashboards for the product team.',
+        starResult:
+          'Reduced data processing time by 40% and eliminated manual reporting tasks. Pipeline now processes data for 100+ enterprise clients daily without intervention.',
+        starMetric: '40% reduction in processing time',
       },
     ],
   },
+
+  /* ── 1. EDUCATION ── */
+  {
+    id: 'education',
+    title: 'EDUCATION',
+    subtitle: 'Academic Background',
+    color: '#a855f7',
+    portalColor: '#c084fc',
+    type: 'education',
+    projects: [
+      {
+        id: 'edu-01',
+        title: 'Software Engineering',
+        description:
+          'Bachelor degree in Software Engineering with focus on systems architecture, data structures, distributed systems, and software project management.',
+        tags: ['Software Engineering', 'Data Engineering'],
+        image: assets.logoUnb,
+        institution: 'Universidade de Brasília (UnB)',
+        institutionLogo: assets.logoUnb,
+        periodStart: 'Jun 2022',
+        periodEnd: 'Dec 2027',
+        competencies: [
+          'Software Engineering',
+          'Data Engineering',
+          'C/C++',
+          'Python',
+          'Networks',
+          'Operating Systems',
+          'Databases',
+          'Algorithms',
+        ],
+        starSituation:
+          "Chose to pursue Software Engineering at one of Brazil's top public universities to build a strong foundation in computer science and systems thinking.",
+        starTask:
+          'Complete a rigorous 5-year program covering everything from low-level systems to enterprise architecture while maintaining practical project experience.',
+        starAction:
+          'Combined coursework with lab research, junior enterprise participation, and personal projects. Focused on data engineering and embedded systems as specializations.',
+        starResult:
+          'Built a diverse portfolio of projects spanning mobile apps, data pipelines, IoT systems, and web applications. Developed strong fundamentals in algorithms, architecture, and teamwork.',
+        starMetric: '15+ projects delivered across 10 semesters',
+      },
+      {
+        id: 'edu-02',
+        title: 'Embedded Systems Residency',
+        description:
+          'Specialized residency program focused on embedded systems development, IoT protocols, microcontrollers, and real-time operating systems.',
+        tags: ['Embedded Systems', 'IoT'],
+        image: assets.logoUnb,
+        institution: 'Universidade de Brasília (UnB)',
+        institutionLogo: assets.logoUnb,
+        periodStart: 'Mar 2024',
+        periodEnd: 'Dec 2025',
+        competencies: [
+          'ESP32',
+          'RTOS',
+          'MQTT',
+          'Embedded C',
+          'PCB Design',
+          'Sensor Integration',
+        ],
+        starSituation:
+          'Identified a gap in practical embedded systems skills within the software engineering curriculum.',
+        starTask:
+          'Complete an intensive residency program while balancing main degree coursework.',
+        starAction:
+          'Developed hands-on projects with ESP32 microcontrollers, designed PCBs, implemented real-time communication protocols, and built IoT sensor networks.',
+        starResult:
+          'Gained end-to-end hardware-software integration skills, from PCB design to cloud data ingestion.',
+        starMetric: '4 embedded prototypes built from scratch',
+      },
+    ],
+  },
+
+  /* ── 3. VOLUNTEER EXPERIENCE ── */
+  {
+    id: 'volunteer',
+    title: 'VOLUNTEER',
+    subtitle: 'Community Impact',
+    color: '#10b981',
+    portalColor: '#34d399',
+    type: 'volunteer',
+    projects: [
+      {
+        id: 'vol-01',
+        title: 'EngNet Consultoria',
+        description:
+          'Junior enterprise focused on engineering consulting. Led technology initiatives and mentored new members.',
+        tags: ['Consulting', 'Leadership'],
+        image: assets.logoUnb,
+        institution: 'EngNet Consultoria',
+        institutionLogo: assets.logoUnb,
+        role: 'Technology Lead',
+        periodStart: 'Mar 2023',
+        periodEnd: 'Dec 2023',
+        techStack: ['Project Management', 'React', 'Node.js'],
+        starSituation:
+          'Junior enterprise lacked standardized tech processes, leading to inconsistent project delivery.',
+        starTask:
+          'Establish tech best practices and lead a team of junior developers through client projects.',
+        starAction:
+          'Introduced Git workflows, code reviews, and CI/CD pipelines. Mentored 8 new developers and led 3 client-facing consulting projects.',
+        starResult:
+          'Reduced project delivery time by 30% and improved client satisfaction scores. All mentees became autonomous contributors.',
+        starMetric: '8 developers mentored, 3 projects delivered',
+      },
+    ],
+  },
+
+  /* ── 4. PROJECTS ── */
   {
     id: 'projects',
     title: 'PROJECTS',
-    subtitle: "What I've Built",
+    subtitle: 'What I Built',
     color: '#f43f5e',
     portalColor: '#fb7185',
+    type: 'projects',
     projects: [
       {
         id: 'proj-01',
-        title: 'Nebula Dashboard',
+        title: 'Automated Water Rocket',
         description:
-          'Real-time 3D data visualization platform processing 10M+ events/day with WebSocket streaming and GPU-accelerated rendering.',
-        tags: ['Three.js', 'WebSocket', 'D3', 'Redis'],
-        link: 'https://github.com',
-        image:
-          'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=400&h=300&fit=crop',
-      },
-      {
-        id: 'proj-02',
-        title: 'Synthwave Generator',
-        description:
-          'Procedural music visualization engine using Web Audio API and custom GLSL shaders. Featured on Awwwards SOTD.',
-        tags: ['GLSL', 'Web Audio', 'Canvas'],
-        link: 'https://github.com',
-        image:
-          'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop',
-      },
-      {
-        id: 'proj-03',
-        title: 'AR Portfolio Viewer',
-        description:
-          'Mobile AR experience allowing clients to view 3D product renders in their physical space using WebXR.',
-        tags: ['WebXR', 'A-Frame', 'Blender'],
-        image:
-          'https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=400&h=300&fit=crop',
-      },
-      {
-        id: 'proj-04',
-        title: 'CryptoVault UI',
-        description:
-          'Designed and developed a premium DeFi dashboard with real-time portfolio tracking, animated charts, and multi-chain support.',
-        tags: ['React', 'Ethers.js', 'Chart.js'],
-        image:
-          'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=300&fit=crop',
-      },
-      {
-        id: 'proj-05',
-        title: 'Procedural Terrain Engine',
-        description:
-          'GPU-driven terrain generation using compute shaders and Marching Cubes. Infinite world with biome blending and erosion simulation.',
-        tags: ['WebGPU', 'Compute Shaders', 'Rust'],
-        image:
-          'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop',
+          'Water rocket with automated ESP32 launch base — pressure sensing, servo release, and Bluetooth telemetry.',
+        tags: ['ESP32', 'IoT', 'Hardware'],
+        image: assets.logoUnb,
+        periodStart: 'Jan 2025',
+        periodEnd: 'Jun 2025',
+        starSituation:
+          'Wanted to apply embedded systems skills to a fun, tangible engineering challenge.',
+        starTask:
+          'Design a fully automated water rocket launch system with telemetry feedback.',
+        starAction:
+          'Designed the pressure vessel, built a PCB with ESP32, pressure transducer and servo controller. Implemented BLE telemetry for real-time launch data.',
+        starResult:
+          'Successfully launched 20+ rockets with consistent pressure control and real-time telemetry at 10Hz.',
+        starMetric: '20+ successful launches',
       },
     ],
   },
+
+  /* ── 5. COURSES & CERTIFICATIONS ── */
   {
-    id: 'contact',
-    title: 'CONTACT',
-    subtitle: "Let's Connect",
-    color: '#10b981',
-    portalColor: '#34d399',
+    id: 'certifications',
+    title: 'CERTIFICATIONS',
+    subtitle: 'Continuous Learning',
+    color: '#eab308',
+    portalColor: '#facc15',
+    type: 'certifications',
     projects: [
       {
-        id: 'contact-01',
-        title: 'Get In Touch',
+        id: 'cert-01',
+        title: 'Fundamentals of Statistics',
         description:
-          "Open to freelance projects, creative collaborations, and full-time opportunities. Let's build something extraordinary together.",
-        tags: ['Email', 'LinkedIn', 'GitHub'],
-        image:
-          'https://images.unsplash.com/photo-1516387938699-a93567ec168e?w=400&h=300&fit=crop',
-      },
-      {
-        id: 'contact-02',
-        title: 'Book a Call',
-        description:
-          'Schedule a 30-minute intro call to discuss your project, timeline, and how we can work together.',
-        tags: ['Calendly', 'Zoom', 'Google Meet'],
-        image:
-          'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=300&fit=crop',
+          'Comprehensive statistics course covering probability, hypothesis testing, regression, and Bayesian inference.',
+        tags: ['Statistics', 'Data Science'],
+        image: assets.logoUnb,
+        institution: 'USP (Universidade de São Paulo)',
+        institutionLogo: assets.logoUnb,
+        periodStart: 'Sep 2025',
+        periodEnd: 'Jun 2026',
+        competencies: [
+          'Probability',
+          'Hypothesis Testing',
+          'Regression',
+          'Bayesian Inference',
+          'Statistical Modeling',
+        ],
       },
     ],
   },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
-   CORRIDOR CONSTANTS — Tweak these to change the feel
+   CORRIDOR CONSTANTS
    ═══════════════════════════════════════════════════════════════ */
 export const CORRIDOR = {
-  /** Total Z-depth of the corridor */
   TOTAL_LENGTH: 280,
-
-  /** Extra padding before first card and after last */
   ENTRY_BUFFER: 8,
-
-  /** Vertical gap between card rows on opposite walls */
   CARD_Y_BASE: 0.2,
-
-  /** How far cards sit from center (X offset) */
   CARD_X_OFFSET: 3.6,
-
-  /** Spacing between cards along Z */
   CARD_Z_SPACING: 9,
-
-  /** Corridor width (triangle size for rings) */
   RING_SIZE: 5,
-
-  /** Number of structural rings */
   RING_COUNT: 140,
-
-  /** Scroll sensitivity (lower = slower) */
   SCROLL_SPEED: 0.00035,
-
-  /** Lerp factor for smooth camera (0-1, lower = smoother) */
   SMOOTH_FACTOR: 0.055,
 } as const;
 
-/**
- * Compute the Z-start for a given section index.
- * Sections are sized proportional to their project count.
- */
 export function getSectionStartZ(sectionIndex: number): number {
   let z = -CORRIDOR.ENTRY_BUFFER;
   for (let i = 0; i < sectionIndex; i++) {
-    z -= SECTIONS[i].projects.length * CORRIDOR.CARD_Z_SPACING + 12; // 12 = portal gap
+    z -= SECTIONS[i].projects.length * CORRIDOR.CARD_Z_SPACING + 12;
   }
   return z;
 }
 
-/** Total projects across all sections — used for corridor sizing */
 export const TOTAL_PROJECTS = SECTIONS.reduce(
   (sum, s) => sum + s.projects.length,
   0,

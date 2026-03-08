@@ -2,8 +2,6 @@ import type { Language } from '../types';
 
 /* ═══════════════════════════════════════════════════════════════
    i18n — All translatable strings for the portfolio
-   
-   Usage:  t("landing.tagline", language)
    ═══════════════════════════════════════════════════════════════ */
 
 const translations: Record<Language, Record<string, string>> = {
@@ -26,18 +24,26 @@ const translations: Record<Language, Record<string, string>> = {
     'hud.scrollHint': 'SCROLL TO EXPLORE',
 
     /* ── Sections ── */
-    'section.about': 'ABOUT',
-    'section.about.sub': 'Who I Am',
+    'section.education': 'EDUCATION',
+    'section.education.sub': 'Academic Background',
     'section.experience': 'EXPERIENCE',
-    'section.experience.sub': "Where I've Been",
+    'section.experience.sub': 'Professional Career',
+    'section.volunteer': 'VOLUNTEER',
+    'section.volunteer.sub': 'Community Impact',
     'section.projects': 'PROJECTS',
-    'section.projects.sub': "What I've Built",
-    'section.contact': 'CONTACT',
-    'section.contact.sub': "Let's Connect",
+    'section.projects.sub': 'What I Built',
+    'section.certifications': 'CERTIFICATIONS',
+    'section.certifications.sub': 'Continuous Learning',
 
-    /* ── Modal ── */
+    /* ── Modal labels ── */
     'modal.viewProject': 'VIEW PROJECT →',
     'modal.close': 'CLOSE',
+    'modal.institution': 'INSTITUTION',
+    'modal.role': 'ROLE',
+    'modal.period': 'PERIOD',
+    'modal.stack': 'TECH STACK',
+    'modal.competencies': 'COMPETENCIES',
+    'modal.ongoing': 'Ongoing',
   },
 
   pt: {
@@ -57,17 +63,25 @@ const translations: Record<Language, Record<string, string>> = {
     'hud.depth': 'PROFUNDIDADE',
     'hud.scrollHint': 'SCROLL PARA EXPLORAR',
 
-    'section.about': 'SOBRE',
-    'section.about.sub': 'Quem Sou',
+    'section.education': 'EDUCAÇÃO',
+    'section.education.sub': 'Formação Acadêmica',
     'section.experience': 'EXPERIÊNCIA',
-    'section.experience.sub': 'Por Onde Passei',
+    'section.experience.sub': 'Carreira Profissional',
+    'section.volunteer': 'VOLUNTARIADO',
+    'section.volunteer.sub': 'Impacto Comunitário',
     'section.projects': 'PROJETOS',
     'section.projects.sub': 'O Que Construí',
-    'section.contact': 'CONTATO',
-    'section.contact.sub': 'Vamos Conectar',
+    'section.certifications': 'CERTIFICAÇÕES',
+    'section.certifications.sub': 'Aprendizado Contínuo',
 
     'modal.viewProject': 'VER PROJETO →',
     'modal.close': 'FECHAR',
+    'modal.institution': 'INSTITUIÇÃO',
+    'modal.role': 'CARGO',
+    'modal.period': 'PERÍODO',
+    'modal.stack': 'STACK TECNOLÓGICA',
+    'modal.competencies': 'COMPETÊNCIAS',
+    'modal.ongoing': 'Em andamento',
   },
 
   es: {
@@ -88,36 +102,38 @@ const translations: Record<Language, Record<string, string>> = {
     'hud.depth': 'PROFUNDIDAD',
     'hud.scrollHint': 'SCROLL PARA EXPLORAR',
 
-    'section.about': 'SOBRE MÍ',
-    'section.about.sub': 'Quién Soy',
+    'section.education': 'EDUCACIÓN',
+    'section.education.sub': 'Formación Académica',
     'section.experience': 'EXPERIENCIA',
-    'section.experience.sub': 'Dónde He Estado',
+    'section.experience.sub': 'Carrera Profesional',
+    'section.volunteer': 'VOLUNTARIADO',
+    'section.volunteer.sub': 'Impacto Comunitario',
     'section.projects': 'PROYECTOS',
-    'section.projects.sub': 'Lo Que He Construido',
-    'section.contact': 'CONTACTO',
-    'section.contact.sub': 'Conectemos',
+    'section.projects.sub': 'Lo Que Construí',
+    'section.certifications': 'CERTIFICACIONES',
+    'section.certifications.sub': 'Aprendizaje Continuo',
 
     'modal.viewProject': 'VER PROYECTO →',
     'modal.close': 'CERRAR',
+    'modal.institution': 'INSTITUCIÓN',
+    'modal.role': 'CARGO',
+    'modal.period': 'PERÍODO',
+    'modal.stack': 'STACK TECNOLÓGICA',
+    'modal.competencies': 'COMPETENCIAS',
+    'modal.ongoing': 'En curso',
   },
 };
 
-/**
- * Translation function.
- * Falls back to English if key is missing in the target language.
- */
 export function t(key: string, lang: Language): string {
   return translations[lang]?.[key] ?? translations.en[key] ?? key;
 }
 
-/** All available languages for the selector */
 export const LANGUAGES: { code: Language; label: string; flag: string }[] = [
   { code: 'en', label: 'English', flag: 'EN' },
   { code: 'pt', label: 'Português', flag: 'PT' },
   { code: 'es', label: 'Español', flag: 'ES' },
 ];
 
-/** Tech stack badges shown on landing */
 export const TECH_STACK = [
   { name: 'Python', color: '#3776ab' },
   { name: 'SQL', color: '#e48e00' },
@@ -129,16 +145,13 @@ export const TECH_STACK = [
   { name: 'Docker', color: '#2496ed' },
 ];
 
-/** Accent color used across landing page UI */
 export const ACCENT = '#4d9fff';
-export const ACCENT_DIM = 'rgba(77,159,255,'; // append opacity + ")" when using
+export const ACCENT_DIM = 'rgba(77,159,255,';
 
-/** Social links */
 export const SOCIAL_LINKS = [
   {
     platform: 'LinkedIn',
     url: 'https://linkedin.com/in/yourprofile',
-    // Simple SVG path for LinkedIn icon
     svgPath:
       'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z',
   },
