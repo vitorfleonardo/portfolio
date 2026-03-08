@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import { t } from '../../data/i18n';
 import { getStarQuestions, tp, ts } from '../../data/projectTranslations';
-import type { ProjectModalProps, SectionType } from '../../types/index';
+// IMPORTANTE: Adicionamos o tipo 'Language' aqui na importação
+import type {
+  Language,
+  ProjectModalProps,
+  SectionType,
+} from '../../types/index';
 
 const FONT = "'JetBrains Mono', 'Fira Code', 'Courier New', monospace";
 
@@ -57,7 +62,7 @@ function PeriodBadge({
   start?: string;
   end?: string;
   color: string;
-  lang: string;
+  lang: Language; // CORRIGIDO PARA Language
 }) {
   if (!start) return null;
   const ongoing: Record<string, string> = {
@@ -130,7 +135,7 @@ function InstitutionHeader({
   name: string;
   logo?: string;
   color: string;
-  lang: string;
+  lang: Language; // CORRIGIDO PARA Language
 }) {
   return (
     <div
@@ -196,7 +201,7 @@ function StarSection({
 }: {
   items: StarItem[];
   color: string;
-  lang: string;
+  lang: Language; // CORRIGIDO PARA Language
 }) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const filteredItems = items.filter((item) => item.answer);
@@ -282,7 +287,7 @@ function EducationContent({
 }: {
   project: any;
   color: string;
-  lang: string;
+  lang: Language; // CORRIGIDO PARA Language
 }) {
   const institution = tp(project.id, 'institution', lang, project.institution);
   const title = tp(project.id, 'title', lang, project.title);
@@ -353,7 +358,7 @@ function ExperienceContent({
 }: {
   project: any;
   color: string;
-  lang: string;
+  lang: Language; // CORRIGIDO PARA Language
 }) {
   const institution = tp(project.id, 'institution', lang, project.institution);
   const role = tp(project.id, 'role', lang, project.role);
@@ -456,7 +461,7 @@ function ProjectContent({
 }: {
   project: any;
   color: string;
-  lang: string;
+  lang: Language; // CORRIGIDO PARA Language
 }) {
   const title = tp(project.id, 'title', lang, project.title);
   const desc = tp(project.id, 'description', lang, project.description);
@@ -569,7 +574,7 @@ function CertificationContent({
 }: {
   project: any;
   color: string;
-  lang: string;
+  lang: Language; // CORRIGIDO PARA Language
 }) {
   const institution = tp(project.id, 'institution', lang, project.institution);
   const title = tp(project.id, 'title', lang, project.title);
@@ -635,7 +640,7 @@ function CertificationContent({
 
 const CONTENT_RENDERERS: Record<
   SectionType,
-  (props: { project: any; color: string; lang: string }) => React.ReactNode
+  (props: { project: any; color: string; lang: Language }) => React.ReactNode // CORRIGIDO AQUI TBM
 > = {
   education: EducationContent,
   experience: ExperienceContent,
@@ -664,7 +669,7 @@ export default function ProjectModal({
   if (!project || !section) return null;
 
   const color = section.color;
-  const lang = language;
+  const lang = language as Language; // Garante a tipagem ao instanciar
   const sectionType = section.type;
   const ContentRenderer = CONTENT_RENDERERS[sectionType] || ProjectContent;
   const showHeroImage = sectionType === 'projects';

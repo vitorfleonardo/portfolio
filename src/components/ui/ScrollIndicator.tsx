@@ -32,7 +32,6 @@ export default function ScrollIndicator({
   onNavigate,
   language,
   onChangeLanguage,
-  fontSize,
   onAdjustFont,
 }: ScrollIndicatorProps) {
   const section = SECTIONS[currentSection] || SECTIONS[0];
