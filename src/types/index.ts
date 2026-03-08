@@ -68,6 +68,7 @@ export interface HoloCardProps {
   rotation?: [number, number, number];
   index: number;
   onSelect: (project: Project, section: Section) => void;
+  language: Language;
 }
 
 export interface PortalProps {
@@ -80,6 +81,7 @@ export interface ProjectModalProps {
   project: Project | null;
   section: Section | null;
   onClose: () => void;
+  language: Language;
 }
 
 /* ── Landing Page ── */

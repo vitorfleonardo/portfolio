@@ -1,13 +1,35 @@
 import { useEffect, useState } from 'react';
+import { t } from '../../data/i18n';
+import { getStarQuestions, tp, ts } from '../../data/projectTranslations';
 import type { ProjectModalProps, SectionType } from '../../types/index';
-
-/* ═══════════════════════════════════════════════════════════════
-   PROJECT MODAL — Expanded with type-specific layouts + STAR toggles
-   ═══════════════════════════════════════════════════════════════ */
 
 const FONT = "'JetBrains Mono', 'Fira Code', 'Courier New', monospace";
 
-/* ── Reusable sub-components ── */
+const DEEP_DIVE: Record<string, string> = {
+  en: 'DEEP DIVE',
+  pt: 'APROFUNDAMENTO',
+  es: 'ANÁLISIS PROFUNDO',
+};
+const KEY_RESULT: Record<string, string> = {
+  en: 'KEY RESULT',
+  pt: 'RESULTADO CHAVE',
+  es: 'RESULTADO CLAVE',
+};
+const INST_LABEL: Record<string, string> = {
+  en: 'INSTITUTION / COMPANY',
+  pt: 'INSTITUIÇÃO / EMPRESA',
+  es: 'INSTITUCIÓN / EMPRESA',
+};
+const COMPETENCIES_LABEL: Record<string, string> = {
+  en: 'COMPETENCIES',
+  pt: 'COMPETÊNCIAS',
+  es: 'COMPETENCIAS',
+};
+const STACK_LABEL: Record<string, string> = {
+  en: 'TECH STACK',
+  pt: 'STACK TECNOLÓGICA',
+  es: 'STACK TECNOLÓGICA',
+};
 
 function FieldLabel({ label, color }: { label: string; color: string }) {
   return (
@@ -15,7 +37,7 @@ function FieldLabel({ label, color }: { label: string; color: string }) {
       style={{
         fontSize: 12,
         letterSpacing: 2,
-        color: `${color}`, // Cor vibrante em vez de opaca
+        color,
         marginBottom: 8,
         textTransform: 'uppercase',
         fontWeight: 600,
@@ -30,12 +52,19 @@ function PeriodBadge({
   start,
   end,
   color,
+  lang,
 }: {
   start?: string;
   end?: string;
   color: string;
+  lang: string;
 }) {
   if (!start) return null;
+  const ongoing: Record<string, string> = {
+    en: 'Ongoing',
+    pt: 'Em andamento',
+    es: 'En curso',
+  };
   return (
     <div
       style={{
@@ -44,7 +73,7 @@ function PeriodBadge({
         gap: 8,
         fontSize: 13,
         letterSpacing: 1,
-        color: '#ffffff', // Branco absoluto para melhor contraste
+        color: '#ffffff',
         padding: '6px 16px',
         background: `${color}20`,
         border: `1px solid ${color}40`,
@@ -54,7 +83,7 @@ function PeriodBadge({
     >
       <span>{start}</span>
       <span style={{ opacity: 0.5 }}>→</span>
-      <span>{end || 'Ongoing'}</span>
+      <span>{end || ongoing[lang] || ongoing.en}</span>
     </div>
   );
 }
@@ -82,7 +111,7 @@ function PillRow({
             background: `${color}15`,
             border: `1px solid ${color}35`,
             borderRadius: 4,
-            color: '#ffffff', // Textos das tags totalmente brancos
+            color: '#ffffff',
           }}
         >
           {item}
@@ -96,10 +125,12 @@ function InstitutionHeader({
   name,
   logo,
   color,
+  lang,
 }: {
   name: string;
   logo?: string;
   color: string;
+  lang: string;
 }) {
   return (
     <div
@@ -113,7 +144,7 @@ function InstitutionHeader({
       {logo && (
         <div
           style={{
-            width: 80, // Logo em tamanho mais elegante
+            width: 80,
             height: 80,
             borderRadius: 8,
             border: `1px solid ${color}30`,
@@ -136,10 +167,10 @@ function InstitutionHeader({
         </div>
       )}
       <div>
-        <FieldLabel label='INSTITUTION / COMPANY' color={color} />
+        <FieldLabel label={INST_LABEL[lang] || INST_LABEL.en} color={color} />
         <div
           style={{
-            fontSize: 28, // Ajustado para não competir com o Cargo
+            fontSize: 28,
             color: '#ffffff',
             fontWeight: 700,
             lineHeight: 1.2,
@@ -152,24 +183,28 @@ function InstitutionHeader({
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   STAR TOGGLE SECTION — Collapsible Q&A
-   ═══════════════════════════════════════════════════════════════ */
-
+/* ── STAR Toggle ── */
 interface StarItem {
   question: string;
   answer?: string;
 }
 
-function StarSection({ items, color }: { items: StarItem[]; color: string }) {
+function StarSection({
+  items,
+  color,
+  lang,
+}: {
+  items: StarItem[];
+  color: string;
+  lang: string;
+}) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
-
   const filteredItems = items.filter((item) => item.answer);
   if (filteredItems.length === 0) return null;
 
   return (
     <div style={{ marginTop: 24 }}>
-      <FieldLabel label='DEEP DIVE' color={color} />
+      <FieldLabel label={DEEP_DIVE[lang] || DEEP_DIVE.en} color={color} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {filteredItems.map((item, i) => {
           const isOpen = openIdx === i;
@@ -184,7 +219,6 @@ function StarSection({ items, color }: { items: StarItem[]; color: string }) {
                 background: isOpen ? `${color}08` : 'transparent',
               }}
             >
-              {/* Toggle header */}
               <button
                 onClick={() => setOpenIdx(isOpen ? null : i)}
                 style={{
@@ -219,14 +253,12 @@ function StarSection({ items, color }: { items: StarItem[]; color: string }) {
                   ▼
                 </span>
               </button>
-
-              {/* Collapsible answer */}
               {isOpen && item.answer && (
                 <div
                   style={{
                     padding: '0 18px 18px',
                     fontSize: 15,
-                    color: 'rgba(255,255,255,0.9)', // Muito mais fácil de ler
+                    color: 'rgba(255,255,255,0.9)',
                     lineHeight: 1.75,
                     animation: 'starReveal 0.3s ease',
                   }}
@@ -242,180 +274,47 @@ function StarSection({ items, color }: { items: StarItem[]; color: string }) {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   CONTENT RENDERERS — one per section type
-   ═══════════════════════════════════════════════════════════════ */
-
-function EducationContent({ project, color }: { project: any; color: string }) {
-  return (
-    <>
-      {project.institution && (
-        <InstitutionHeader
-          name={project.institution}
-          logo={project.institutionLogo}
-          color={color}
-        />
-      )}
-      <h2
-        style={{
-          fontSize: 28,
-          fontWeight: 700,
-          color: color, // Destaque no curso (em vez de repetir instituição)
-          margin: '0 0 14px',
-          lineHeight: 1.3,
-        }}
-      >
-        {project.role || project.title}
-      </h2>
-      <PeriodBadge
-        start={project.periodStart}
-        end={project.periodEnd}
-        color={color}
-      />
-      <div
-        style={{
-          height: 1,
-          background: `linear-gradient(90deg, ${color}50, transparent)`,
-          margin: '22px 0',
-        }}
-      />
-      <p
-        style={{
-          fontSize: 16,
-          color: 'rgba(255,255,255,0.9)', // Mais branco para legibilidade
-          lineHeight: 1.8,
-          margin: '0 0 24px',
-        }}
-      >
-        {project.description}
-      </p>
-      {project.competencies?.length > 0 && (
-        <>
-          <FieldLabel label='COMPETENCIES' color={color} />
-          <PillRow items={project.competencies} color={color} size='md' />
-        </>
-      )}
-    </>
-  );
-}
-
-function ExperienceContent({
+/* ── Content Renderers ── */
+function EducationContent({
   project,
   color,
+  lang,
 }: {
   project: any;
   color: string;
+  lang: string;
 }) {
+  const institution = tp(project.id, 'institution', lang, project.institution);
+  const title = tp(project.id, 'title', lang, project.title);
+  const desc = tp(project.id, 'description', lang, project.description);
+  const comps =
+    tp(project.id, 'competencies', lang, project.competencies) || [];
   return (
     <>
-      {project.institution && (
+      {institution && (
         <InstitutionHeader
-          name={project.institution}
+          name={institution}
           logo={project.institutionLogo}
           color={color}
+          lang={lang}
         />
       )}
       <h2
         style={{
           fontSize: 28,
           fontWeight: 700,
-          color: color, // Dá super destaque ao CARGO (Role)
+          color,
           margin: '0 0 14px',
           lineHeight: 1.3,
         }}
       >
-        {project.role || project.title}
+        {project.role || title}
       </h2>
       <PeriodBadge
         start={project.periodStart}
         end={project.periodEnd}
         color={color}
-      />
-      <div
-        style={{
-          height: 1,
-          background: `linear-gradient(90deg, ${color}50, transparent)`,
-          margin: '22px 0',
-        }}
-      />
-      <p
-        style={{
-          fontSize: 16,
-          color: 'rgba(255,255,255,0.9)', // Brighter text!
-          lineHeight: 1.8,
-          margin: '0 0 24px',
-        }}
-      >
-        {project.description}
-      </p>
-      {project.techStack?.length > 0 && (
-        <>
-          <FieldLabel label='TECH STACK' color={color} />
-          <PillRow items={project.techStack} color={color} size='md' />
-        </>
-      )}
-
-      {/* Highlight metric */}
-      {project.starMetric && (
-        <div
-          style={{
-            marginTop: 24,
-            padding: '16px 20px',
-            borderRadius: 6,
-            background: `${color}08`,
-            border: `1px solid ${color}30`,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 16,
-          }}
-        >
-          <div style={{ fontSize: 22, color, opacity: 0.9 }}>◆</div>
-          <div>
-            <div
-              style={{
-                fontSize: 11,
-                letterSpacing: 2,
-                fontWeight: 600,
-                color: color,
-                marginBottom: 4,
-              }}
-            >
-              KEY RESULT
-            </div>
-            <div
-              style={{
-                fontSize: 16,
-                color: '#ffffff',
-                fontWeight: 600,
-              }}
-            >
-              {project.starMetric}
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
-function ProjectContent({ project, color }: { project: any; color: string }) {
-  return (
-    <>
-      <h2
-        style={{
-          fontSize: 32,
-          fontWeight: 700,
-          color: '#ffffff', // Em Projetos o Título do projeto ganha o branco
-          margin: '0 0 14px',
-          lineHeight: 1.3,
-        }}
-      >
-        {project.title}
-      </h2>
-      <PeriodBadge
-        start={project.periodStart}
-        end={project.periodEnd}
-        color={color}
+        lang={lang}
       />
       <div
         style={{
@@ -432,12 +331,89 @@ function ProjectContent({ project, color }: { project: any; color: string }) {
           margin: '0 0 24px',
         }}
       >
-        {project.description}
+        {desc}
       </p>
-      {project.tags?.length > 0 && (
-        <PillRow items={project.tags} color={color} size='md' />
+      {comps.length > 0 && (
+        <>
+          <FieldLabel
+            label={COMPETENCIES_LABEL[lang] || COMPETENCIES_LABEL.en}
+            color={color}
+          />
+          <PillRow items={comps} color={color} size='md' />
+        </>
       )}
-      {project.starMetric && (
+    </>
+  );
+}
+
+function ExperienceContent({
+  project,
+  color,
+  lang,
+}: {
+  project: any;
+  color: string;
+  lang: string;
+}) {
+  const institution = tp(project.id, 'institution', lang, project.institution);
+  const role = tp(project.id, 'role', lang, project.role);
+  const desc = tp(project.id, 'description', lang, project.description);
+  const stack = tp(project.id, 'techStack', lang, project.techStack) || [];
+  const metric = tp(project.id, 'starMetric', lang, project.starMetric);
+  return (
+    <>
+      {institution && (
+        <InstitutionHeader
+          name={institution}
+          logo={project.institutionLogo}
+          color={color}
+          lang={lang}
+        />
+      )}
+      <h2
+        style={{
+          fontSize: 28,
+          fontWeight: 700,
+          color,
+          margin: '0 0 14px',
+          lineHeight: 1.3,
+        }}
+      >
+        {role || project.title}
+      </h2>
+      <PeriodBadge
+        start={project.periodStart}
+        end={project.periodEnd}
+        color={color}
+        lang={lang}
+      />
+      <div
+        style={{
+          height: 1,
+          background: `linear-gradient(90deg, ${color}50, transparent)`,
+          margin: '22px 0',
+        }}
+      />
+      <p
+        style={{
+          fontSize: 16,
+          color: 'rgba(255,255,255,0.9)',
+          lineHeight: 1.8,
+          margin: '0 0 24px',
+        }}
+      >
+        {desc}
+      </p>
+      {stack.length > 0 && (
+        <>
+          <FieldLabel
+            label={STACK_LABEL[lang] || STACK_LABEL.en}
+            color={color}
+          />
+          <PillRow items={stack} color={color} size='md' />
+        </>
+      )}
+      {metric && (
         <div
           style={{
             marginTop: 24,
@@ -457,20 +433,100 @@ function ProjectContent({ project, color }: { project: any; color: string }) {
                 fontSize: 11,
                 letterSpacing: 2,
                 fontWeight: 600,
-                color: color,
+                color,
                 marginBottom: 4,
               }}
             >
-              KEY RESULT
+              {KEY_RESULT[lang] || KEY_RESULT.en}
             </div>
+            <div style={{ fontSize: 16, color: '#ffffff', fontWeight: 600 }}>
+              {metric}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function ProjectContent({
+  project,
+  color,
+  lang,
+}: {
+  project: any;
+  color: string;
+  lang: string;
+}) {
+  const title = tp(project.id, 'title', lang, project.title);
+  const desc = tp(project.id, 'description', lang, project.description);
+  const tags = tp(project.id, 'tags', lang, project.tags) || [];
+  const metric = tp(project.id, 'starMetric', lang, project.starMetric);
+  return (
+    <>
+      <h2
+        style={{
+          fontSize: 32,
+          fontWeight: 700,
+          color: '#ffffff',
+          margin: '0 0 14px',
+          lineHeight: 1.3,
+        }}
+      >
+        {title}
+      </h2>
+      <PeriodBadge
+        start={project.periodStart}
+        end={project.periodEnd}
+        color={color}
+        lang={lang}
+      />
+      <div
+        style={{
+          height: 1,
+          background: `linear-gradient(90deg, ${color}50, transparent)`,
+          margin: '22px 0',
+        }}
+      />
+      <p
+        style={{
+          fontSize: 16,
+          color: 'rgba(255,255,255,0.9)',
+          lineHeight: 1.8,
+          margin: '0 0 24px',
+        }}
+      >
+        {desc}
+      </p>
+      {tags.length > 0 && <PillRow items={tags} color={color} size='md' />}
+      {metric && (
+        <div
+          style={{
+            marginTop: 24,
+            padding: '16px 20px',
+            borderRadius: 6,
+            background: `${color}08`,
+            border: `1px solid ${color}30`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+          }}
+        >
+          <div style={{ fontSize: 22, color, opacity: 0.9 }}>◆</div>
+          <div>
             <div
               style={{
-                fontSize: 16,
-                color: '#ffffff',
+                fontSize: 11,
+                letterSpacing: 2,
                 fontWeight: 600,
+                color,
+                marginBottom: 4,
               }}
             >
-              {project.starMetric}
+              {KEY_RESULT[lang] || KEY_RESULT.en}
+            </div>
+            <div style={{ fontSize: 16, color: '#ffffff', fontWeight: 600 }}>
+              {metric}
             </div>
           </div>
         </div>
@@ -488,7 +544,7 @@ function ProjectContent({ project, color }: { project: any; color: string }) {
             background: `${color}15`,
             border: `1px solid ${color}40`,
             borderRadius: 6,
-            color: '#ffffff', // Texto de Botão perfeitamente legível
+            color: '#ffffff',
             fontSize: 13,
             fontWeight: 600,
             letterSpacing: 2,
@@ -499,7 +555,7 @@ function ProjectContent({ project, color }: { project: any; color: string }) {
             transition: 'all 0.25s ease',
           }}
         >
-          VIEW PROJECT →
+          {t('modal.viewProject', lang)}
         </a>
       )}
     </>
@@ -509,34 +565,43 @@ function ProjectContent({ project, color }: { project: any; color: string }) {
 function CertificationContent({
   project,
   color,
+  lang,
 }: {
   project: any;
   color: string;
+  lang: string;
 }) {
+  const institution = tp(project.id, 'institution', lang, project.institution);
+  const title = tp(project.id, 'title', lang, project.title);
+  const desc = tp(project.id, 'description', lang, project.description);
+  const comps =
+    tp(project.id, 'competencies', lang, project.competencies) || [];
   return (
     <>
-      {project.institution && (
+      {institution && (
         <InstitutionHeader
-          name={project.institution}
+          name={institution}
           logo={project.institutionLogo}
           color={color}
+          lang={lang}
         />
       )}
       <h2
         style={{
           fontSize: 28,
           fontWeight: 700,
-          color: color,
+          color,
           margin: '0 0 14px',
           lineHeight: 1.3,
         }}
       >
-        {project.role || project.title}
+        {project.role || title}
       </h2>
       <PeriodBadge
         start={project.periodStart}
         end={project.periodEnd}
         color={color}
+        lang={lang}
       />
       <div
         style={{
@@ -553,12 +618,15 @@ function CertificationContent({
           margin: '0 0 24px',
         }}
       >
-        {project.description}
+        {desc}
       </p>
-      {project.competencies?.length > 0 && (
+      {comps.length > 0 && (
         <>
-          <FieldLabel label='COMPETENCIES' color={color} />
-          <PillRow items={project.competencies} color={color} size='md' />
+          <FieldLabel
+            label={COMPETENCIES_LABEL[lang] || COMPETENCIES_LABEL.en}
+            color={color}
+          />
+          <PillRow items={comps} color={color} size='md' />
         </>
       )}
     </>
@@ -567,7 +635,7 @@ function CertificationContent({
 
 const CONTENT_RENDERERS: Record<
   SectionType,
-  (props: { project: any; color: string }) => React.ReactNode
+  (props: { project: any; color: string; lang: string }) => React.ReactNode
 > = {
   education: EducationContent,
   experience: ExperienceContent,
@@ -577,12 +645,13 @@ const CONTENT_RENDERERS: Record<
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   MODAL COMPONENT
+   MODAL
    ═══════════════════════════════════════════════════════════════ */
 export default function ProjectModal({
   project,
   section,
   onClose,
+  language,
 }: ProjectModalProps) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -595,27 +664,34 @@ export default function ProjectModal({
   if (!project || !section) return null;
 
   const color = section.color;
+  const lang = language;
   const sectionType = section.type;
   const ContentRenderer = CONTENT_RENDERERS[sectionType] || ProjectContent;
   const showHeroImage = sectionType === 'projects';
 
-  /* Build STAR items */
+  const sectionTitle = ts(section.id, lang).title;
+  const starQuestions = getStarQuestions(lang);
+
   const starItems: StarItem[] = [
     {
-      question: 'What was the context and scale of this challenge?',
-      answer: project.starSituation,
+      question: starQuestions[0],
+      answer:
+        tp(project.id, 'starSituation', lang, project.starSituation) ||
+        undefined,
     },
     {
-      question: 'What specific task did you take on?',
-      answer: project.starTask,
+      question: starQuestions[1],
+      answer: tp(project.id, 'starTask', lang, project.starTask) || undefined,
     },
     {
-      question: 'What concrete actions did you plan and execute?',
-      answer: project.starAction,
+      question: starQuestions[2],
+      answer:
+        tp(project.id, 'starAction', lang, project.starAction) || undefined,
     },
     {
-      question: 'What tangible results did you achieve?',
-      answer: project.starResult,
+      question: starQuestions[3],
+      answer:
+        tp(project.id, 'starResult', lang, project.starResult) || undefined,
     },
   ];
 
@@ -635,7 +711,6 @@ export default function ProjectModal({
         animation: 'modalFadeIn 0.35s ease',
       }}
     >
-      {/* Backdrop */}
       <div
         style={{
           position: 'absolute',
@@ -644,13 +719,11 @@ export default function ProjectModal({
           backdropFilter: 'blur(16px)',
         }}
       />
-
-      {/* Card */}
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
           position: 'relative',
-          maxWidth: 680, // Expandimos levemente a largura da Modal
+          maxWidth: 680,
           width: '100%',
           maxHeight: '90vh',
           overflowY: 'auto',
@@ -663,7 +736,6 @@ export default function ProjectModal({
           fontFamily: FONT,
         }}
       >
-        {/* Accent bar */}
         <div
           style={{
             height: 3,
@@ -671,8 +743,6 @@ export default function ProjectModal({
             boxShadow: `0 0 20px ${color}80`,
           }}
         />
-
-        {/* Hero image (projects only) */}
         {showHeroImage && project.image && (
           <div
             style={{
@@ -690,8 +760,6 @@ export default function ProjectModal({
             />
           </div>
         )}
-
-        {/* Header row */}
         <div
           style={{
             padding: showHeroImage ? '20px 32px 0' : '28px 32px 0',
@@ -705,11 +773,11 @@ export default function ProjectModal({
               fontSize: 10,
               fontWeight: 600,
               letterSpacing: 3,
-              color: `${color}`,
+              color,
               textTransform: 'uppercase',
             }}
           >
-            {section.title}
+            {sectionTitle}
           </div>
           <button
             onClick={onClose}
@@ -732,30 +800,17 @@ export default function ProjectModal({
             ✕
           </button>
         </div>
-
-        {/* Type-specific content */}
         <div style={{ padding: '20px 32px 12px' }}>
-          <ContentRenderer project={project} color={color} />
+          <ContentRenderer project={project} color={color} lang={lang} />
         </div>
-
-        {/* STAR toggle sections */}
         {hasStarContent && (
           <div style={{ padding: '0 32px 32px' }}>
-            <StarSection items={starItems} color={color} />
+            <StarSection items={starItems} color={color} lang={lang} />
           </div>
         )}
-
-        {/* Bottom close area */}
         {!hasStarContent && <div style={{ height: 24 }} />}
       </div>
-
-      {/* CSS */}
-      <style>{`
-        @keyframes starReveal {
-          from { opacity: 0; transform: translateY(-6px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+      <style>{`@keyframes starReveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
     </div>
   );
 }

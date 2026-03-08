@@ -1,5 +1,8 @@
+import { useState } from 'react';
+import { ACCENT_DIM, LANGUAGES } from '../../data/i18n';
 import { SECTIONS } from '../../data/projects';
-import type { Section } from '../../types/index';
+import { ts } from '../../data/projectTranslations';
+import type { Language } from '../../types/index';
 
 interface ScrollIndicatorProps {
   currentSection: number;
@@ -7,29 +10,37 @@ interface ScrollIndicatorProps {
   hasScrolled: boolean;
   isVisible: boolean;
   onNavigate: (sectionIndex: number) => void;
+  language: Language;
+  onChangeLanguage: (lang: Language) => void;
+  fontSize: number;
+  onAdjustFont: (delta: number) => void;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   HUD OVERLAY — All DOM UI layered above the Canvas
+const FONT = "'JetBrains Mono', 'Fira Code', 'Courier New', monospace";
 
-   Sections:
-   - Top-left: branding + current section title
-   - Top-right: depth percentage
-   - Right: section navigation dots
-   - Bottom-center: scroll hint (fades after first scroll)
-   - Bottom: progress bar
-   ═══════════════════════════════════════════════════════════════ */
+const SCROLL_HINT: Record<string, string> = {
+  en: 'SCROLL TO EXPLORE',
+  pt: 'SCROLL PARA EXPLORAR',
+  es: 'SCROLL PARA EXPLORAR',
+};
+
 export default function ScrollIndicator({
   currentSection,
   progress,
   hasScrolled,
   isVisible,
   onNavigate,
+  language,
+  onChangeLanguage,
+  fontSize,
+  onAdjustFont,
 }: ScrollIndicatorProps) {
-  const section: Section = SECTIONS[currentSection] || SECTIONS[0];
+  const section = SECTIONS[currentSection] || SECTIONS[0];
+  const translated = ts(section.id, language);
+  const [langOpen, setLangOpen] = useState(false);
 
   const base: React.CSSProperties = {
-    fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace",
+    fontFamily: FONT,
     pointerEvents: 'none',
     opacity: isVisible ? 1 : 0,
     transition: 'opacity 0.8s ease',
@@ -37,7 +48,7 @@ export default function ScrollIndicator({
 
   return (
     <>
-      {/* ─── TOP LEFT: Branding + Section ─── */}
+      {/* ─── TOP LEFT: Branding + Section (translated) ─── */}
       <div
         style={{
           ...base,
@@ -67,7 +78,7 @@ export default function ScrollIndicator({
             transition: 'color 0.5s ease',
           }}
         >
-          {section.title}
+          {translated.title}
         </div>
         <div
           style={{
@@ -78,11 +89,11 @@ export default function ScrollIndicator({
             transition: 'color 0.5s ease',
           }}
         >
-          {section.subtitle}
+          {translated.subtitle}
         </div>
       </div>
 
-      {/* ─── TOP RIGHT: Depth ─── */}
+      {/* ─── TOP RIGHT: Depth + Accessibility Controls ─── */}
       <div
         style={{
           ...base,
@@ -90,32 +101,163 @@ export default function ScrollIndicator({
           top: 0,
           right: 0,
           padding: '26px 32px',
-          textAlign: 'right',
           zIndex: 20,
+          pointerEvents: 'auto',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 16,
         }}
       >
-        <div
-          style={{
-            fontSize: 9,
-            letterSpacing: 3,
-            color: 'rgba(255,255,255,0.2)',
-          }}
-        >
-          DEPTH
+        {/* Language selector */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setLangOpen(!langOpen)}
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: `1px solid ${ACCENT_DIM}0.15)`,
+              borderRadius: 4,
+              padding: '6px 12px',
+              color: 'rgba(255,255,255,0.5)',
+              fontSize: 11,
+              letterSpacing: 2,
+              cursor: 'pointer',
+              fontFamily: FONT,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              transition: 'all 0.3s ease',
+            }}
+          >
+            {LANGUAGES.find((l) => l.code === language)?.flag}
+            <span style={{ fontSize: 9, opacity: 0.4 }}>▼</span>
+          </button>
+
+          {langOpen && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 'calc(100% + 4px)',
+                right: 0,
+                background: 'rgba(6,12,22,0.96)',
+                border: `1px solid ${ACCENT_DIM}0.12)`,
+                borderRadius: 4,
+                overflow: 'hidden',
+                backdropFilter: 'blur(16px)',
+                animation: 'labelFadeIn 0.2s ease',
+                zIndex: 50,
+              }}
+            >
+              {LANGUAGES.map((lang_item) => (
+                <button
+                  key={lang_item.code}
+                  onClick={() => {
+                    onChangeLanguage(lang_item.code);
+                    setLangOpen(false);
+                  }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '8px 16px',
+                    background:
+                      language === lang_item.code
+                        ? `${ACCENT_DIM}0.08)`
+                        : 'transparent',
+                    border: 'none',
+                    color:
+                      language === lang_item.code
+                        ? 'rgba(255,255,255,0.8)'
+                        : 'rgba(255,255,255,0.4)',
+                    fontSize: 10,
+                    letterSpacing: 1.5,
+                    cursor: 'pointer',
+                    fontFamily: FONT,
+                    textAlign: 'left',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {lang_item.flag}&nbsp;&nbsp;{lang_item.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
+
+        {/* Font size controls */}
         <div
           style={{
-            fontSize: 20,
-            color: 'rgba(255,255,255,0.45)',
-            fontVariantNumeric: 'tabular-nums',
-            marginTop: 2,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            border: `1px solid ${ACCENT_DIM}0.12)`,
+            borderRadius: 4,
+            padding: '3px 4px',
           }}
         >
-          {Math.round(progress * 100)}%
+          <button
+            onClick={() => onAdjustFont(-0.1)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'rgba(255,255,255,0.4)',
+              cursor: 'pointer',
+              fontFamily: FONT,
+              fontSize: 13,
+              padding: '2px 6px',
+              lineHeight: 1,
+              fontWeight: 600,
+              transition: 'color 0.2s',
+            }}
+          >
+            A−
+          </button>
+          <div
+            style={{ width: 1, height: 14, background: `${ACCENT_DIM}0.1)` }}
+          />
+          <button
+            onClick={() => onAdjustFont(0.1)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'rgba(255,255,255,0.4)',
+              cursor: 'pointer',
+              fontFamily: FONT,
+              fontSize: 13,
+              padding: '2px 6px',
+              lineHeight: 1,
+              fontWeight: 600,
+              transition: 'color 0.2s',
+            }}
+          >
+            A+
+          </button>
+        </div>
+
+        {/* Depth indicator */}
+        <div style={{ textAlign: 'right' }}>
+          <div
+            style={{
+              fontSize: 9,
+              letterSpacing: 3,
+              color: 'rgba(255,255,255,0.2)',
+            }}
+          >
+            DEPTH
+          </div>
+          <div
+            style={{
+              fontSize: 20,
+              color: 'rgba(255,255,255,0.45)',
+              fontVariantNumeric: 'tabular-nums',
+              marginTop: 2,
+            }}
+          >
+            {Math.round(progress * 100)}%
+          </div>
         </div>
       </div>
 
-      {/* ─── RIGHT: Section Nav Dots ─── */}
+      {/* ─── RIGHT: Section Nav Dots (translated tooltips) ─── */}
       <div
         style={{
           ...base,
@@ -132,11 +274,12 @@ export default function ScrollIndicator({
       >
         {SECTIONS.map((s, i) => {
           const isActive = i === currentSection;
+          const sTranslated = ts(s.id, language);
           return (
             <button
               key={s.id}
               onClick={() => onNavigate(i)}
-              title={s.title}
+              title={sTranslated.title}
               style={{
                 width: 10,
                 height: isActive ? 30 : 10,
@@ -161,12 +304,11 @@ export default function ScrollIndicator({
                     letterSpacing: 2,
                     color: s.color,
                     whiteSpace: 'nowrap',
-                    fontFamily:
-                      "'JetBrains Mono', 'Fira Code', 'Courier New', monospace",
+                    fontFamily: FONT,
                     animation: 'labelFadeIn 0.3s ease',
                   }}
                 >
-                  {s.title}
+                  {sTranslated.title}
                 </span>
               )}
             </button>
@@ -174,7 +316,7 @@ export default function ScrollIndicator({
         })}
       </div>
 
-      {/* ─── BOTTOM CENTER: Scroll Hint ─── */}
+      {/* ─── BOTTOM CENTER: Scroll Hint (translated) ─── */}
       {!hasScrolled && (
         <div
           style={{
@@ -196,7 +338,7 @@ export default function ScrollIndicator({
               marginBottom: 10,
             }}
           >
-            SCROLL TO EXPLORE
+            {SCROLL_HINT[language] || SCROLL_HINT.en}
           </div>
           <div
             style={{
@@ -247,8 +389,6 @@ export default function ScrollIndicator({
             boxShadow: `0 0 8px ${section.color}60`,
           }}
         />
-
-        {/* Section markers on the progress bar */}
         {SECTIONS.map((s, i) => (
           <div
             key={s.id}

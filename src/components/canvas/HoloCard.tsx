@@ -2,15 +2,13 @@ import { Image as DreiImage, Text } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import React, { Suspense, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { tp, ts } from '../../data/projectTranslations';
 import type { HoloCardProps, ScrollState } from '../../types/index';
 
 interface HoloCardInternalProps extends HoloCardProps {
   scrollState: React.RefObject<ScrollState>;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   ESCUDO ANTI-CRASH PARA IMAGENS WEBGL (Error Boundary)
-   ═══════════════════════════════════════════════════════════════ */
 class ImageBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean }
@@ -23,19 +21,27 @@ class ImageBoundary extends React.Component<
     return { hasError: true };
   }
   componentDidCatch(error: any) {
-    console.warn('⚠️ Imagem bloqueada (CORS/404) e ocultada.', error.message);
+    console.warn('⚠️ Image blocked:', error.message);
   }
   render() {
-    if (this.state.hasError) return null;
-    return this.props.children;
+    return this.state.hasError ? null : this.props.children;
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   CONSTANTES GEOMÉTRICAS DO CARTÃO
-   ═══════════════════════════════════════════════════════════════ */
 const CARD_W = 4.7;
 const CARD_H = 3.7;
+
+const CLICK_HINT: Record<string, string> = {
+  en: '▸ CLICK TO EXPAND',
+  pt: '▸ CLIQUE PARA EXPANDIR',
+  es: '▸ CLIC PARA EXPANDIR',
+};
+
+const ONGOING: Record<string, string> = {
+  en: 'Ongoing',
+  pt: 'Em andamento',
+  es: 'En curso',
+};
 
 export default function HoloCard({
   project,
@@ -45,6 +51,7 @@ export default function HoloCard({
   index,
   onSelect,
   scrollState,
+  language,
 }: HoloCardInternalProps) {
   const groupRef = useRef<THREE.Group>(null!);
   const fillRef = useRef<THREE.MeshBasicMaterial>(null!);
@@ -54,8 +61,6 @@ export default function HoloCard({
   const particlesRef = useRef<THREE.Points>(null!);
   const glowRef = useRef<THREE.MeshBasicMaterial>(null!);
   const darkPlateRef = useRef<THREE.MeshBasicMaterial>(null!);
-
-  // Refs para controle de opacidade e fade-in
   const textInstRef = useRef<any>(null!);
   const textTitleRef = useRef<any>(null!);
   const textPeriodRef = useRef<any>(null!);
@@ -68,45 +73,60 @@ export default function HoloCard({
 
   const [hovered, setHovered] = useState(false);
   const { gl } = useThree();
-
   const color = useMemo(() => new THREE.Color(section.color), [section.color]);
 
   const isProject = section.type === 'projects';
   const hasLogo = !isProject && Boolean(project.institutionLogo);
   const hasImage = isProject && Boolean(project.image);
 
-  // Prepara as variáveis em Strings limpas
-  const displayInst = String(project.institution || section.title || '');
+  /* ── TRANSLATED TEXT ── */
+  const displayInst = String(
+    tp(project.id, 'institution', language, project.institution) ||
+      ts(section.id, language).title ||
+      '',
+  );
+
   const displayTitle = String(
     (section.type === 'experience' || section.type === 'volunteer') &&
       project.role
-      ? project.role
-      : project.title || '',
+      ? tp(project.id, 'role', language, project.role)
+      : tp(project.id, 'title', language, project.title) || '',
   );
-  const displayDesc = String(project.description || '');
 
-  // Formata o período no padrão terminal: [ Jan 2025 - Ongoing ]
+  const displayDesc = String(
+    tp(project.id, 'description', language, project.description) || '',
+  );
+
   const rawPeriod = project.periodStart
-    ? `${project.periodStart} - ${project.periodEnd || 'Ongoing'}`
+    ? `${project.periodStart} - ${project.periodEnd || ONGOING[language] || ONGOING.en}`
     : project.year || '';
   const periodText = rawPeriod ? `[ ${rawPeriod} ]` : '';
 
-  // Formata as tags/competências no padrão: [ Python ]  [ SQL ]
   const pills =
     section.type === 'education' || section.type === 'certifications'
-      ? (project.competencies || project.tags || []).slice(0, 6)
+      ? (
+          tp(project.id, 'competencies', language, project.competencies) ||
+          project.tags ||
+          []
+        ).slice(0, 6)
       : section.type === 'experience' || section.type === 'volunteer'
-        ? (project.techStack || project.tags || []).slice(0, 6)
-        : (project.tags || []).slice(0, 6);
+        ? (
+            tp(project.id, 'techStack', language, project.techStack) ||
+            project.tags ||
+            []
+          ).slice(0, 6)
+        : (tp(project.id, 'tags', language, project.tags) || []).slice(0, 6);
 
   const tagsString =
-    pills.length > 0 ? pills.map((p) => `[ ${p} ]`).join('   ') : '';
+    pills.length > 0 ? pills.map((p: string) => `[ ${p} ]`).join('   ') : '';
+  const hintText = CLICK_HINT[language] || CLICK_HINT.en;
 
+  /* ── GEOMETRY ── */
   const borderGeo = useMemo(() => {
     const hw = CARD_W / 2,
       hh = CARD_H / 2,
       b = 0.15;
-    const pts = [
+    return new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(-hw + b, hh, 0),
       new THREE.Vector3(hw - b, hh, 0),
       new THREE.Vector3(hw, hh - b, 0),
@@ -116,8 +136,7 @@ export default function HoloCard({
       new THREE.Vector3(-hw, -hh + b, 0),
       new THREE.Vector3(-hw, hh - b, 0),
       new THREE.Vector3(-hw + b, hh, 0),
-    ];
-    return new THREE.BufferGeometry().setFromPoints(pts);
+    ]);
   }, []);
 
   const particleGeo = useMemo(() => {
@@ -133,26 +152,24 @@ export default function HoloCard({
     return geo;
   }, []);
 
+  /* ── ANIMATION ── */
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
     const t = clock.getElapsedTime();
     const camZ = scrollState.current.cameraZ;
     const dist = Math.abs(position[2] - camZ);
-
     const visible = dist < 25;
     const opacity = visible ? Math.max(0, 1 - dist / 22) : 0;
-    const hoverBoost = hovered ? 1.4 : 1;
+    const hb = hovered ? 1.4 : 1;
 
     groupRef.current.visible = visible;
     if (!visible) return;
 
-    if (fillRef.current) fillRef.current.opacity = opacity * 0.08 * hoverBoost;
-    if (borderRef.current)
-      borderRef.current.opacity = opacity * 0.6 * hoverBoost;
+    if (fillRef.current) fillRef.current.opacity = opacity * 0.08 * hb;
+    if (borderRef.current) borderRef.current.opacity = opacity * 0.6 * hb;
     if (glowRef.current) glowRef.current.opacity = hovered ? opacity * 0.06 : 0;
     if (darkPlateRef.current) darkPlateRef.current.opacity = opacity * 0.5;
     if (separatorRef.current) separatorRef.current.opacity = opacity * 0.3;
-
     if (textInstRef.current) textInstRef.current.fillOpacity = opacity * 0.9;
     if (textTitleRef.current) textTitleRef.current.fillOpacity = opacity;
     if (textPeriodRef.current)
@@ -162,10 +179,9 @@ export default function HoloCard({
     if (textDescRef.current) textDescRef.current.fillOpacity = opacity * 0.85;
     if (textTagsRef.current) textTagsRef.current.fillOpacity = opacity * 0.8;
     if (textHintRef.current) textHintRef.current.fillOpacity = opacity * 0.8;
-
     if (imageRef.current) {
       const mat = imageRef.current.material as any;
-      if (mat && mat.opacity !== undefined) mat.opacity = opacity * 0.95;
+      if (mat?.opacity !== undefined) mat.opacity = opacity * 0.95;
     }
 
     groupRef.current.position.y =
@@ -218,7 +234,6 @@ export default function HoloCard({
         <planeGeometry args={[CARD_W + 0.4, CARD_H + 0.4]} />
         <meshBasicMaterial transparent opacity={0} side={THREE.DoubleSide} />
       </mesh>
-
       <mesh position={[0, 0, -0.05]}>
         <planeGeometry args={[CARD_W + 1, CARD_H + 0.8]} />
         <meshBasicMaterial
@@ -230,7 +245,6 @@ export default function HoloCard({
           blending={THREE.AdditiveBlending}
         />
       </mesh>
-
       <mesh>
         <planeGeometry args={[CARD_W, CARD_H]} />
         <meshBasicMaterial
@@ -242,7 +256,6 @@ export default function HoloCard({
           depthWrite={false}
         />
       </mesh>
-
       <mesh position={[0, 0, 0.02]}>
         <planeGeometry args={[CARD_W - 0.2, CARD_H - 0.2]} />
         <meshBasicMaterial
@@ -253,7 +266,6 @@ export default function HoloCard({
           depthWrite={false}
         />
       </mesh>
-
       <lineSegments geometry={borderGeo}>
         <lineBasicMaterial
           ref={borderRef}
@@ -263,7 +275,6 @@ export default function HoloCard({
           depthWrite={false}
         />
       </lineSegments>
-
       <mesh ref={scanRef} position={[0, 0, 0.01]}>
         <planeGeometry args={[CARD_W - 0.1, 0.02]} />
         <meshBasicMaterial
@@ -274,7 +285,6 @@ export default function HoloCard({
           blending={THREE.AdditiveBlending}
         />
       </mesh>
-
       <mesh ref={iconRef} position={[CARD_W / 2 - 0.4, CARD_H / 2 - 0.4, 0.1]}>
         <octahedronGeometry args={[0.2, 0]} />
         <meshBasicMaterial
@@ -285,7 +295,6 @@ export default function HoloCard({
           depthWrite={false}
         />
       </mesh>
-
       <points ref={particlesRef} geometry={particleGeo}>
         <pointsMaterial
           color={color}
@@ -297,27 +306,23 @@ export default function HoloCard({
         />
       </points>
 
-      {/* ═══ TERMINAL LAYOUT (NATIVE 3D TEXT) ═══ */}
+      {/* ═══ TRANSLATED TEXT LAYOUT ═══ */}
       <group position={[0, 0, 0.06]}>
         {!isProject ? (
-          // ── LAYOUT DE TERMINAL (EXPERIÊNCIA, EDUCAÇÃO, ETC) ──
           <>
-            {/* LOGO QUADRADA (Esquerda) */}
-            {hasLogo ? (
+            {hasLogo && (
               <ImageBoundary>
                 <Suspense fallback={null}>
                   <DreiImage
                     ref={imageRef}
                     url={project.institutionLogo!}
-                    position={[-1.5, 1.05, 0]} // Centralizada na coluna da esquerda
+                    position={[-1.5, 1.05, 0]}
                     scale={[0.7, 0.7]}
                     transparent
                   />
                 </Suspense>
               </ImageBoundary>
-            ) : null}
-
-            {/* EMPRESA / INSTITUIÇÃO */}
+            )}
             {displayInst && (
               <Text
                 ref={textInstRef}
@@ -332,8 +337,6 @@ export default function HoloCard({
                 {displayInst.toUpperCase()}
               </Text>
             )}
-
-            {/* CARGO */}
             {displayTitle && (
               <Text
                 ref={textTitleRef}
@@ -348,8 +351,6 @@ export default function HoloCard({
                 {displayTitle}
               </Text>
             )}
-
-            {/* PERÍODO (Movido para debaixo do cargo, alinhado à esquerda) */}
             {periodText && (
               <Text
                 ref={textPeriodRef}
@@ -363,8 +364,6 @@ export default function HoloCard({
                 {periodText}
               </Text>
             )}
-
-            {/* LINHA SEPARADORA */}
             <mesh position={[hasLogo ? 0.5 : 0.0, 0.5, 0]}>
               <planeGeometry args={[hasLogo ? 2.8 : 3.8, 0.015]} />
               <meshBasicMaterial
@@ -375,8 +374,6 @@ export default function HoloCard({
                 depthWrite={false}
               />
             </mesh>
-
-            {/* TAGS / PILLS (Coloridas e Responsivas com MaxWidth) */}
             {tagsString && (
               <Text
                 ref={textTagsRef}
@@ -392,8 +389,6 @@ export default function HoloCard({
                 {tagsString}
               </Text>
             )}
-
-            {/* BULLET POINT PROMPT ( > ) + DESCRIÇÃO (Abaixado para dar espaço às Tags se quebrarem linha) */}
             {displayDesc && (
               <group position={[-1.9, -0.25, 0]}>
                 <Text
@@ -423,9 +418,8 @@ export default function HoloCard({
             )}
           </>
         ) : (
-          // ── LAYOUT HERO BANNER (PROJETOS) ──
           <Suspense fallback={null}>
-            {hasImage ? (
+            {hasImage && (
               <ImageBoundary>
                 <DreiImage
                   ref={imageRef}
@@ -435,8 +429,7 @@ export default function HoloCard({
                   transparent
                 />
               </ImageBoundary>
-            ) : null}
-
+            )}
             {displayTitle && (
               <Text
                 ref={textTitleRef}
@@ -451,7 +444,6 @@ export default function HoloCard({
                 {displayTitle}
               </Text>
             )}
-
             {periodText && (
               <Text
                 ref={textPeriodRef}
@@ -465,7 +457,6 @@ export default function HoloCard({
                 {periodText}
               </Text>
             )}
-
             {displayDesc && (
               <group position={[-1.9, -0.9, 0]}>
                 <Text
@@ -495,8 +486,6 @@ export default function HoloCard({
             )}
           </Suspense>
         )}
-
-        {/* CLICK HINT (Rodapé Global) */}
         <Text
           ref={textHintRef}
           position={[2.0, -1.5, 0]}
@@ -506,7 +495,7 @@ export default function HoloCard({
           color={color}
           letterSpacing={0.15}
         >
-          ▸ CLICK TO EXPAND
+          {hintText}
         </Text>
       </group>
     </group>

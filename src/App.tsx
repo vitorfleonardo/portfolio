@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { AppPhase, Project, Section } from './types';
+import type { AppPhase, Language, Project, Section } from './types';
 
 /* Canvas components */
 import Corridor from './components/canvas/Corridor';
@@ -24,13 +24,15 @@ import { useScrollProgress } from './hooks/useScrollProgress';
 import { CORRIDOR, SECTIONS } from './data/projects';
 
 /* ═══════════════════════════════════════════════════════════════
-   CORRIDOR SCENE — Lives inside <Canvas>, renders when phase
-   is "transition" (late) or "corridor"
+   CORRIDOR SCENE — Lives inside <Canvas>
+   Now receives language prop to pass to HoloCards
    ═══════════════════════════════════════════════════════════════ */
 function CorridorScene({
   onSelectProject,
+  language,
 }: {
   onSelectProject: (project: Project, section: Section) => void;
+  language: Language;
 }) {
   const {
     scrollState,
@@ -41,7 +43,6 @@ function CorridorScene({
     totalZ,
   } = useScrollProgress();
 
-  /* Compute layout once */
   const layout = useMemo(() => {
     const portals: { section: Section; z: number; index: number }[] = [];
     const cards: {
@@ -83,7 +84,7 @@ function CorridorScene({
   );
   usePortalTransition(scrollState, portalZs);
 
-  /* Bridge to DOM (simple approach — in production use Zustand) */
+  /* Bridge to DOM */
   (window as any).__corridorScroll = {
     scrollTo,
     setLocked,
@@ -116,6 +117,7 @@ function CorridorScene({
           index={card.index}
           onSelect={onSelectProject}
           scrollState={scrollState}
+          language={language}
         />
       ))}
     </>
@@ -123,12 +125,7 @@ function CorridorScene({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   APP — Root orchestrator with phase state machine
-   
-   Phases:
-     "landing"    → LandingScene (3D) + LandingPage (DOM)
-     "transition" → Portal zoom animation (2.5s)
-     "corridor"   → Corridor (3D) + HUD (DOM)
+   APP — Root orchestrator
    ═══════════════════════════════════════════════════════════════ */
 export default function App() {
   const [phase, setPhase] = useState<AppPhase>('landing');
@@ -158,26 +155,18 @@ export default function App() {
     );
   }, []);
 
-  /* ── Transition animation (landing → corridor) ── */
+  /* ── Transition animation ── */
   const startTransition = useCallback(() => {
     if (phase !== 'landing') return;
-
     setPhase('transition');
+    if (audioEnabled) startAudio();
 
-    // Start audio if enabled
-    if (audioEnabled) {
-      startAudio();
-    }
-
-    // Animate transitionProgress from 0 → 1 over 2.8 seconds
     const duration = 2800;
     const startTime = performance.now();
 
     const animate = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-
-      // Ease-in-out cubic for smooth acceleration
       const eased =
         progress < 0.5
           ? 4 * progress * progress * progress
@@ -188,7 +177,6 @@ export default function App() {
       if (progress < 1) {
         transitionRef.current = requestAnimationFrame(animate);
       } else {
-        // Transition complete → enter corridor
         setPhase('corridor');
         setTransitionProgress(0);
       }
@@ -197,7 +185,6 @@ export default function App() {
     transitionRef.current = requestAnimationFrame(animate);
   }, [phase, audioEnabled, startAudio]);
 
-  /* Cleanup transition on unmount */
   useEffect(() => {
     return () => {
       if (transitionRef.current) cancelAnimationFrame(transitionRef.current);
@@ -225,7 +212,6 @@ export default function App() {
     scroll.scrollTo(target);
   }, []);
 
-  /* Audio toggle on landing */
   const handleToggleAudio = useCallback(() => {
     setIsEnabled((prev: boolean) => !prev);
   }, [setIsEnabled]);
@@ -250,28 +236,21 @@ export default function App() {
         position: 'relative',
       }}
     >
-      {/* ─── SINGLE CANVAS (always mounted) ─── */}
+      {/* ─── SINGLE CANVAS ─── */}
       <Canvas
-        camera={{
-          fov: 75,
-          near: 0.1,
-          far: 300,
-          position: [0, 0, 8],
-        }}
+        camera={{ fov: 75, near: 0.1, far: 300, position: [0, 0, 8] }}
         dpr={[1, 2]}
-        gl={{
-          antialias: true,
-          toneMapping: 5,
-          toneMappingExposure: 1.2,
-        }}
+        gl={{ antialias: true, toneMapping: 5, toneMappingExposure: 1.2 }}
         onCreated={() => setCanvasReady(true)}
         style={{ position: 'absolute', inset: 0 }}
       >
-        {/* Landing scene: visible during landing + transition */}
         {isLanding && <LandingScene transitionProgress={transitionProgress} />}
-
-        {/* Corridor scene: mounts during corridor phase */}
-        {isCorridor && <CorridorScene onSelectProject={handleSelectProject} />}
+        {isCorridor && (
+          <CorridorScene
+            onSelectProject={handleSelectProject}
+            language={language}
+          />
+        )}
       </Canvas>
 
       {/* ─── LOADING SCREEN ─── */}
@@ -322,7 +301,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* ─── LANDING PAGE (DOM overlay) ─── */}
+      {/* ─── LANDING PAGE ─── */}
       {isLanding && canvasReady && (
         <LandingPage
           language={language}
@@ -336,7 +315,7 @@ export default function App() {
         />
       )}
 
-      {/* ─── CORRIDOR HUD ─── */}
+      {/* ─── CORRIDOR HUD (with language + font controls) ─── */}
       {isCorridor && (
         <>
           <ScrollIndicator
@@ -345,9 +324,13 @@ export default function App() {
             hasScrolled={hasScrolled}
             isVisible={true}
             onNavigate={handleNavigate}
+            language={language}
+            onChangeLanguage={setLanguage}
+            fontSize={fontSize}
+            onAdjustFont={adjustFont}
           />
 
-          {/* Audio toggle in corridor (bottom-right) */}
+          {/* Audio toggle */}
           <button
             onClick={toggleAudio}
             style={{
@@ -392,43 +375,24 @@ export default function App() {
         </>
       )}
 
-      {/* ─── PROJECT MODAL ─── */}
+      {/* ─── PROJECT MODAL (with language) ─── */}
       <ProjectModal
         project={selectedProject?.project || null}
         section={selectedProject?.section || null}
         onClose={handleCloseModal}
+        language={language}
       />
 
       {/* ─── GLOBAL STYLES ─── */}
       <style>{`
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { overflow: hidden; background: #040810; }
-        
-        @keyframes loadBar {
-          0% { width: 0; transform: translateX(0); }
-          50% { width: 100%; }
-          100% { width: 0; transform: translateX(160px); }
-        }
-        @keyframes modalFadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes modalSlideUp {
-          from { transform: translateY(30px) scale(0.96); opacity: 0; }
-          to { transform: translateY(0) scale(1); opacity: 1; }
-        }
-        @keyframes scrollDot {
-          0% { top: 6px; opacity: 1; }
-          100% { top: 20px; opacity: 0; }
-        }
-        @keyframes hintFadeIn {
-          from { opacity: 0; transform: translateX(-50%) translateY(15px); }
-          to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-        @keyframes labelFadeIn {
-          from { opacity: 0; transform: translateX(5px) translateY(-50%); }
-          to { opacity: 1; transform: translateX(0) translateY(-50%); }
-        }
+        @keyframes loadBar { 0% { width: 0; transform: translateX(0); } 50% { width: 100%; } 100% { width: 0; transform: translateX(160px); } }
+        @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalSlideUp { from { transform: translateY(30px) scale(0.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes scrollDot { 0% { top: 6px; opacity: 1; } 100% { top: 20px; opacity: 0; } }
+        @keyframes hintFadeIn { from { opacity: 0; transform: translateX(-50%) translateY(15px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes labelFadeIn { from { opacity: 0; transform: translateX(5px) translateY(-50%); } to { opacity: 1; transform: translateX(0) translateY(-50%); } }
       `}</style>
     </div>
   );
