@@ -103,14 +103,14 @@ function ConvergingLines() {
           line.end,
         ]);
         return (
-          <line key={i} geometry={geo}>
+          <lineSegments key={i} geometry={geo}>
             <lineBasicMaterial
               color='#4488cc'
               transparent
               opacity={line.opacity}
               depthWrite={false}
             />
-          </line>
+          </lineSegments>
         );
       })}
     </group>

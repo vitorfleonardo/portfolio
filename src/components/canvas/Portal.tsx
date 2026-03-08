@@ -5,7 +5,7 @@ import { createShapePoints, getBiomeTheme } from '../../data/themes';
 import type { PortalProps, ScrollState } from '../../types/index';
 
 interface PortalInternalProps extends PortalProps {
-  scrollState: React.MutableRefObject<ScrollState>;
+  scrollState: React.RefObject<ScrollState>;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -160,7 +160,9 @@ export default function Portal({
     if (warpRef.current) {
       const warpOpacity = traversing ? 0.5 + Math.sin(t * 10) * 0.3 : 0;
       warpRef.current.children.forEach((child) => {
-        (child as THREE.LineSegments).material.opacity = warpOpacity;
+        (
+          (child as THREE.LineSegments).material as THREE.LineBasicMaterial
+        ).opacity = warpOpacity;
       });
       // Streaks rush toward camera
       if (traversing) {

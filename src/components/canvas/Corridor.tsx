@@ -160,7 +160,6 @@ function Grid({
    ═══════════════════════════════════════════════════════════════ */
 function BiomeAccents({
   scrollState,
-  totalZ,
 }: {
   scrollState: React.RefObject<ScrollState>;
   totalZ: number;

@@ -204,8 +204,7 @@ export default function HoloCard({
     setHovered(false);
     gl.domElement.style.cursor = 'default';
   };
-  const handleClick = (e: THREE.Event) => {
-    e.stopPropagation();
+  const handleClick = () => {
     onSelect(project, section);
   };
 
@@ -255,7 +254,7 @@ export default function HoloCard({
         />
       </mesh>
 
-      <line geometry={borderGeo}>
+      <lineSegments geometry={borderGeo}>
         <lineBasicMaterial
           ref={borderRef}
           color={color}
@@ -263,7 +262,7 @@ export default function HoloCard({
           opacity={0.5}
           depthWrite={false}
         />
-      </line>
+      </lineSegments>
 
       <mesh ref={scanRef} position={[0, 0, 0.01]}>
         <planeGeometry args={[CARD_W - 0.1, 0.02]} />
@@ -299,7 +298,7 @@ export default function HoloCard({
       </points>
 
       {/* ═══ TERMINAL LAYOUT (NATIVE 3D TEXT) ═══ */}
-      <group position={[0, 0, 0.06]} style={{ pointerEvents: 'none' }}>
+      <group position={[0, 0, 0.06]}>
         {!isProject ? (
           // ── LAYOUT DE TERMINAL (EXPERIÊNCIA, EDUCAÇÃO, ETC) ──
           <>
